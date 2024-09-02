@@ -69,31 +69,30 @@ function Today() {
 
   //must check if theres a doc for the day, if it is update if not add it
   const saveDay = () => {
-    const currentDate = new Date();
+    const currentDate = new Date().toISOString().split("T")[0];
 
     const existingDays = getDocs(doc("daysList")).data();
     //STEP 1 : find out if there is a day for the current day in the database
 
     let todayExist = false;
+    let dayObj = null;
 
     existingDays.forEach((day) => {
-      if (day.date === currentDate.toISOString().split("T")[0])
+      if (day.date === currentDate) {
         todayExist = true;
+        dayObj = day;
+      }
     });
 
     //STEP 2 : if there is a day in the database update it otherwise create it
 
     if (todayExist) {
-      existingDays.forEach((day) => {
-        if (day.date === currentDate.toISOString().split("T")[0]) {
-          updateDoc(doc("daysList", day.id), {
-            calories: totalCalories,
-          });
-        }
+      updateDoc(doc("daysList", dayObj.id), {
+        calories: totalCalories,
       });
     } else {
       addDoc(doc("daysList"), {
-        date: currentDate.toISOString().split("T")[0],
+        date: currentDate,
         calories: totalCalories,
       });
     }
