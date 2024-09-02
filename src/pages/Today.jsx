@@ -1,12 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getDocs, doc, getDoc, addDoc, deleteDoc } from "firestorage";
+import {
+  getDocs,
+  doc,
+  getDoc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+} from "firestorage";
 
 function Today() {
   //states
   const [foodsList, setFoodsList] = useState([]);
   const [selectedFoodId, setSelectedFoodId] = useState(null);
   const [todayFoods, setTodayFoods] = useState([]);
+
+  const navigate = useNavigate();
 
   //load page with
   useEffect(() => {
@@ -57,6 +66,42 @@ function Today() {
   todayFoods.forEach((food) => {
     totalCalories += food.calories * food.servings;
   });
+
+  //must check if theres a doc for the day, if it is update if not add it
+  const saveDay = () => {
+    const currentDate = new Date();
+
+    const existingDays = getDocs(doc("daysList")).data();
+    //STEP 1 : find out if there is a day for the current day in the database
+
+    let todayExist = false;
+
+    existingDays.forEach((day) => {
+      if (day.date === currentDate.toISOString().split("T")[0])
+        todayExist = true;
+    });
+
+    //STEP 2 : if there is a day in the database update it otherwise create it
+
+    if (todayExist) {
+      existingDays.forEach((day) => {
+        if (day.date === currentDate.toISOString().split("T")[0]) {
+          updateDoc(doc("daysList", day.id), {
+            calories: totalCalories,
+          });
+        }
+      });
+    } else {
+      addDoc(doc("daysList"), {
+        date: currentDate.toISOString().split("T")[0],
+        calories: totalCalories,
+      });
+    }
+
+    console.log(existingDays);
+
+    navigate("/week");
+  };
 
   return (
     <>
@@ -135,7 +180,14 @@ function Today() {
           })}
         </tbody>
       </table>
-      <span>Today Calories {totalCalories}</span>
+      <span>Today you have consumed {totalCalories}kcal</span>
+      <button
+        onClick={() => {
+          saveDay();
+        }}
+      >
+        Save
+      </button>
     </>
   );
 }

@@ -7,6 +7,9 @@ function Home() {
       <Link to="/today">
         <button>Today</button>
       </Link>
+      <Link to="/week">
+        <button>Week</button>
+      </Link>
       <Link to="/foods">
         <button>Calories Table</button>
       </Link>
