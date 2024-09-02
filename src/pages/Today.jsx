@@ -73,23 +73,11 @@ function Today() {
   const saveDay = () => {
     const currentDate = new Date().toISOString().split("T")[0];
 
-    const existingDays = getDocs(doc("daysList")).data();
-    //STEP 1 : find out if there is a day for the current day in the database
-
-    let todayExist = false;
-    let dayObj = null;
-
     const q = query(doc("daysList"), where("date", "==", currentDate));
     const result = getDocs(q).data();
+    const dayObj = result[0];
 
-    if (result.length != 0) {
-      todayExist = true;
-      dayObj = result[0];
-    }
-
-    //STEP 2 : if there is a day in the database update it otherwise create it
-
-    if (todayExist) {
+    if (dayObj !== undefined) {
       updateDoc(doc("daysList", dayObj.id), {
         calories: totalCalories,
       });
@@ -99,8 +87,6 @@ function Today() {
         calories: totalCalories,
       });
     }
-
-    console.log(existingDays);
 
     navigate("/week");
   };
