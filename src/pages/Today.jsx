@@ -7,6 +7,8 @@ import {
   addDoc,
   deleteDoc,
   updateDoc,
+  query,
+  where,
 } from "firestorage";
 
 function Today() {
@@ -77,12 +79,13 @@ function Today() {
     let todayExist = false;
     let dayObj = null;
 
-    existingDays.forEach((day) => {
-      if (day.date === currentDate) {
-        todayExist = true;
-        dayObj = day;
-      }
-    });
+    const q = query(doc("daysList"), where("date", "==", currentDate));
+    const result = getDocs(q).data();
+
+    if (result.length != 0) {
+      todayExist = true;
+      dayObj = result[0];
+    }
 
     //STEP 2 : if there is a day in the database update it otherwise create it
 
